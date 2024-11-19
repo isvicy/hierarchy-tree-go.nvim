@@ -14,6 +14,7 @@ function C.setup(user_config)
 			cursorline = "guibg=Gray guifg=White" -- hl  window cursorline
 		},
 		keymap = {
+      disable_all = true,
 			--global keymap
 			incoming = "<space>fi", -- call incoming under cursorword
 			outgoing = "<space>fo", -- call outgoing under cursorword

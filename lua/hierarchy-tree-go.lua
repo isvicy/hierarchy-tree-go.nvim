@@ -17,7 +17,10 @@ function H.setup(user_config)
 	c = config.get_data()
 
 	w.setup()
-	H.global_keymap()
+
+  if not c.keymap.disable_all then
+	  H.global_keymap()
+  end
 end
 
 function H.global_keymap()
