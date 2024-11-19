@@ -6,15 +6,15 @@ function C.setup(user_config)
 			fold = "", -- fold icon
 			unfold = "", -- unfold icon
 			func = "₣", -- symbol
-			last = '☉', -- last level icon
+			last = "☉", -- last level icon
 		},
 		hl = {
 			current_module = "guifg=Green", -- highlight cwd module line
 			others_module = "guifg=Black", -- highlight others module line
-			cursorline = "guibg=Gray guifg=White" -- hl  window cursorline
+			cursorline = "guibg=Gray guifg=White", -- hl  window cursorline
 		},
 		keymap = {
-      disable_all = true,
+			disable_all = true,
 			--global keymap
 			incoming = "<space>fi", -- call incoming under cursorword
 			outgoing = "<space>fo", -- call outgoing under cursorword
@@ -28,8 +28,8 @@ function C.setup(user_config)
 			-- bufkeymap
 			expand = "o", -- expand or collapse hierarchy
 			jump = "<CR>", -- jump
-			move = "<space><space>" -- switch the hierarchy window position, must be current win
-		}
+			move = "<space><space>", -- switch the hierarchy window position, must be current win
+		},
 	}
 
 	if user_config == nil or type(user_config) ~= "table" then
@@ -45,7 +45,6 @@ function C.setup(user_config)
 			end
 		end
 	end
-
 end
 
 function C.get_data()

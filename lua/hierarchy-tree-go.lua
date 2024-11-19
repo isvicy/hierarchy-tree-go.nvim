@@ -1,10 +1,9 @@
 local H = {
-	client = nil
+	client = nil,
 }
 
 local json = require("xxx.json")
 local notify = require("xxx.notify")
-
 
 local t = require("xxx.tree")
 local w = require("xxx.window")
@@ -18,23 +17,23 @@ function H.setup(user_config)
 
 	w.setup()
 
-  if not c.keymap.disable_all then
-	  H.global_keymap()
-  end
+	if not c.keymap.disable_all then
+		H.global_keymap()
+	end
 end
 
 function H.global_keymap()
-	vim.keymap.set("n", c.keymap.incoming, "<cmd>lua require\"hierarchy-tree-go\".incoming()<cr>", { silent = true })
-	vim.keymap.set("n", c.keymap.focus, "<cmd>lua require\"hierarchy-tree-go\".focus()<cr>", { silent = true })
-	vim.keymap.set("n", c.keymap.outgoing, "<cmd>lua require\"hierarchy-tree-go\".outgoing()<cr>", { silent = true })
-	vim.keymap.set("n", c.keymap.open, "<cmd>lua require\"hierarchy-tree-go\".open()<cr>", { silent = true })
-	vim.keymap.set("n", c.keymap.close, "<cmd>lua require\"hierarchy-tree-go\".close()<cr>", { silent = true })
+	vim.keymap.set("n", c.keymap.incoming, '<cmd>lua require"hierarchy-tree-go".incoming()<cr>', { silent = true })
+	vim.keymap.set("n", c.keymap.focus, '<cmd>lua require"hierarchy-tree-go".focus()<cr>', { silent = true })
+	vim.keymap.set("n", c.keymap.outgoing, '<cmd>lua require"hierarchy-tree-go".outgoing()<cr>', { silent = true })
+	vim.keymap.set("n", c.keymap.open, '<cmd>lua require"hierarchy-tree-go".open()<cr>', { silent = true })
+	vim.keymap.set("n", c.keymap.close, '<cmd>lua require"hierarchy-tree-go".close()<cr>', { silent = true })
 end
 
 function H.incoming()
 	if not H.check_filetype() then
 		notify("Filetype error", vim.log.levels.ERROR, {
-			title = "Call incoming"
+			title = "Call incoming",
 		})
 		return
 	end
@@ -45,14 +44,21 @@ function H.incoming()
 		local root = t.create_node(vim.fn.expand("<cword>"), 12, params.textDocument.uri, params.textDocument.uri, {
 			start = {
 				line = params.position.line,
-				character = params.position.character
-			}
+				character = params.position.character,
+			},
 		})
 		root.status = "open"
 
 		root.children = {}
 		for _, item in ipairs(result) do
-			local child = t.create_node(item.from.name, item.from.kind, item.from.uri, item.from.detail, item.from.range, item.fromRanges)
+			local child = t.create_node(
+				item.from.name,
+				item.from.kind,
+				item.from.uri,
+				item.from.detail,
+				item.from.range,
+				item.fromRanges
+			)
 			table.insert(root.children, child)
 		end
 
@@ -68,7 +74,7 @@ end
 function H.outgoing()
 	if not H.check_filetype() then
 		notify("Filetype error", vim.log.levels.ERROR, {
-			title = "Call outgoing"
+			title = "Call outgoing",
 		})
 		return
 	end
@@ -78,14 +84,15 @@ function H.outgoing()
 		local root = t.create_node(vim.fn.expand("<cword>"), 12, params.textDocument.uri, params.textDocument.uri, {
 			start = {
 				line = params.position.line,
-				character = params.position.character
-			}
+				character = params.position.character,
+			},
 		})
 		root.status = "open"
 
 		root.children = {}
 		for _, item in ipairs(result) do
-			local child = t.create_node(item.to.name, item.to.kind, item.to.uri, item.to.detail, item.to.range, item.fromRanges)
+			local child =
+				t.create_node(item.to.name, item.to.kind, item.to.uri, item.to.detail, item.to.range, item.fromRanges)
 			table.insert(root.children, child)
 		end
 
@@ -98,7 +105,7 @@ function H.get_children(params, direction, callback)
 	vim.lsp.buf_request(nil, "textDocument/prepareCallHierarchy", params, function(err, result)
 		if err then
 			notify.notify("Prepare error" .. json.encode(err), vim.log.levels.ERROR, {
-				title = "Hierarchy prepare"
+				title = "Hierarchy prepare",
 			})
 			return
 		end
@@ -120,7 +127,7 @@ end
 function H.prepare_obj(uri, postion)
 	return {
 		textDocument = {
-			uri = uri
+			uri = uri,
 		},
 		position = postion,
 	}
@@ -150,7 +157,7 @@ function H.call_hierarchy(opts, method, title, item, callback)
 	vim.lsp.buf_request(opts.bufnr, method, { item = item }, function(err, result)
 		if err then
 			notify(json.encode(err), vim.log.levels.ERROR, {
-				title = title
+				title = title,
 			})
 			return
 		end
@@ -172,7 +179,6 @@ function H.attach_gopls()
 			notify("no gopls client", vim.log.levels.ERROR, {})
 			return false
 		end
-
 	end
 
 	if not vim.lsp.buf_is_attached(w.buff, H.client) then
@@ -183,14 +189,14 @@ function H.attach_gopls()
 end
 
 function H.expand()
-    local line = vim.fn.line(".")
+	local line = vim.fn.line(".")
 	local node = t.nodes[tonumber(line)]
 
 	if node.status == "open" then
 		if #node.children > 0 then
 			node.status = "fold"
 			w.create_window()
-			vim.cmd("execute  \"normal! " .. line .. "G\"")
+			vim.cmd('execute  "normal! ' .. line .. 'G"')
 		end
 
 		return
@@ -199,7 +205,7 @@ function H.expand()
 	if node.status == "fold" then
 		node.status = "open"
 		w.create_window()
-		vim.cmd("execute  \"normal! " .. line .. "G\"")
+		vim.cmd('execute  "normal! ' .. line .. 'G"')
 		return
 	end
 
@@ -209,7 +215,7 @@ function H.expand()
 
 	local params = H.prepare_obj(node.uri, {
 		line = node.range.start.line,
-		character = node.range.start.character
+		character = node.range.start.character,
 	})
 
 	H.get_children(params, t.direction, function(result)
@@ -218,17 +224,30 @@ function H.expand()
 			for _, item in ipairs(result) do
 				local child
 				if t.direction == "outgoing" then
-					child = t.create_node(item.to.name, item.to.kind, item.to.uri, item.to.detail, item.to.range, item.fromRanges)
+					child = t.create_node(
+						item.to.name,
+						item.to.kind,
+						item.to.uri,
+						item.to.detail,
+						item.to.range,
+						item.fromRanges
+					)
 				else
-					child = t.create_node(item.from.name, item.from.kind, item.from.uri, item.from.detail, item.from.range, item.fromRanges)
+					child = t.create_node(
+						item.from.name,
+						item.from.kind,
+						item.from.uri,
+						item.from.detail,
+						item.from.range,
+						item.fromRanges
+					)
 				end
 
 				table.insert(node.children, child)
 			end
 		end
 		w.create_window()
-		vim.cmd("execute  \"normal! " .. line .. "G\"")
-
+		vim.cmd('execute  "normal! ' .. line .. 'G"')
 	end)
 end
 
